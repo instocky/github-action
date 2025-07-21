@@ -1,0 +1,41 @@
+name: Forward API Request
+
+on:
+  # Запускается только по API-запросу (или вручную из интерфейса GitHub)
+  workflow_dispatch:
+    # Определяем параметры, которые мы ожидаем получить в запросе
+    inputs:
+      name:
+        description: 'Имя пользователя'
+        required: true
+      email:
+        description: 'Email пользователя'
+        required: true
+      message:
+        description: 'Текст сообщения'
+        required: true
+
+jobs:
+  forward-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run script to forward data
+        # Передаем полученные inputs в переменные окружения для скрипта
+        env:
+          INPUT_NAME: ${{ github.event.inputs.name }}
+          INPUT_EMAIL: ${{ github.event.inputs.email }}
+          INPUT_MESSAGE: ${{ github.event.inputs.message }}
+        run: python api-request-forward.py
